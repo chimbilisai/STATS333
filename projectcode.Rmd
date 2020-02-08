@@ -1,0 +1,66 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, echo=FALSE}
+rm(list = ls())
+
+data = read.csv("Teams.csv", header = T)
+
+prior_data = data[1371:1613, c(2,7,20,43)]
+prior_data_AL = prior_data[which(prior_data$lgID == "AL"),]
+prior_data_NL = prior_data[which(prior_data$lgID == "NL"),]
+post_data = data[c(1614:1891), c(2,7,20,43)]
+post_data_AL = post_data[which(post_data$lgID == "AL"),]
+post_data_NL = post_data[which(post_data$lgID == "NL"),]
+
+adjusted_HR_AL_prior = c()
+adjusted_HR_NL_prior = c()
+adjusted_attendance_AL_prior = c()
+adjusted_attendance_NL_prior = c()
+adjusted_HR_AL_post = c()
+adjusted_HR_NL_post = c()
+adjusted_attendance_AL_post = c()
+adjusted_attendance_NL_post = c()
+
+for (k in 1:120){
+  games = prior_data_AL$G[k]
+  adjusted_attendance_AL_prior[k] = prior_data_AL$attendance[k] * (165/games)
+  adjusted_HR_AL_prior[k] = prior_data_AL$HR[k] * (165/games)
+}
+
+for (k in 1:146){
+  games = post_data_AL$G[k]
+  adjusted_attendance_AL_post[k] = post_data_AL$attendance[k] * (165/games)
+  adjusted_HR_AL_post[k] = post_data_AL$HR[k] * (165/games)
+}
+
+for (k in 1:123){
+  games = prior_data_NL$G[k]
+  adjusted_attendance_NL_prior[k] = prior_data_NL$attendance[k] * (165/games)
+  adjusted_HR_NL_prior[k] = prior_data_NL$HR[k] * (165/games)
+}
+
+for (k in 1:132){
+  games = post_data_NL$G[k]
+  adjusted_attendance_NL_post[k] = post_data_NL$attendance[k] * (165/games)
+  adjusted_HR_NL_post[k] = post_data_NL$HR[k] * (165/games)
+}
+
+m1 = lm(adjusted_attendance_AL_prior~adjusted_HR_AL_prior)
+
+m2 = lm(adjusted_attendance_AL_post~adjusted_HR_AL_post)
+
+par(mfrow = c(1,2))
+
+plot(adjusted_HR_AL_prior, adjusted_attendance_AL_prior, xlab = "Adjusted Home Runs Prior", ylab = "Adjusted Attendance Prior",
+     main = "Adjusted Home Runs and \nAdjusted Attendance Before \nDH Rule for AL", ylim = c(450000, 3000000))
+abline(m1, lwd = 2, col = "red")
+plot(adjusted_HR_AL_post, adjusted_attendance_AL_post, xlab = "Adjusted Home Runs Post", ylab = "Adjusted Attendance Post",
+     main = "Adjusted Home Runs and \nAdjusted Attendance After \nDH Rule for AL", ylim = c(450000, 3000000))
+abline(m2, lwd = 2, col = "red")
+
+```
